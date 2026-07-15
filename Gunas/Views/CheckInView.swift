@@ -1,6 +1,8 @@
 import SwiftUI
+import SwiftData
 
 struct CheckInView: View {
+    @Environment(\.modelContext) private var modelContext
     @State private var selectedTags: Set<FeelingTag> = []
     @State private var freeText: String = ""
     @State private var resultBlend: GunaBlend?
@@ -107,8 +109,15 @@ struct CheckInView: View {
     private func computeResult() {
         let tagBlend = selectedTags.isEmpty ? nil : GunaBlend.average(selectedTags.map(\.blend))
         let textBlend = GunaClassifier.classifyText(freeText)
-        resultBlend = GunaClassifier.combine(tagBlend: tagBlend, textBlend: textBlend)
+        let blend = GunaClassifier.combine(tagBlend: tagBlend, textBlend: textBlend)
+        resultBlend = blend
+
+        let trimmedNote = freeText.trimmingCharacters(in: .whitespacesAndNewlines)
+        modelContext.insert(CheckInEntry(blend: blend, note: trimmedNote))
+
         showResult = true
+        selectedTags.removeAll()
+        freeText = ""
     }
 }
 

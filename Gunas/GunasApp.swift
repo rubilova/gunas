@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 @main
 struct GunasApp: App {
@@ -14,5 +15,6 @@ struct GunasApp: App {
                 }
             }
         }
+        .modelContainer(for: CheckInEntry.self)
     }
 }

@@ -1,14 +1,8 @@
 import SwiftUI
+import SwiftData
 
 struct HistoryView: View {
-    // Mock data standing in for real check-in history: 0 = sattva, 1 = rajas, 2 = tamas.
-    private let mockDays: [Guna] = [
-        .rajas, .rajas, .sattva, .tamas, .sattva, .rajas, .tamas,
-        .sattva, .rajas, .rajas, .tamas, .tamas, .sattva, .rajas,
-        .rajas, .sattva, .tamas, .rajas, .rajas, .sattva, .tamas,
-        .rajas, .rajas, .sattva, .tamas, .sattva, .rajas, .rajas,
-        .tamas, .sattva,
-    ]
+    @Query(sort: \CheckInEntry.date, order: .reverse) private var entries: [CheckInEntry]
 
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 4), count: 7)
 
@@ -25,35 +19,28 @@ struct HistoryView: View {
                         .foregroundStyle(GunaColors.muted)
                         .padding(.bottom, 16)
 
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("THIS MONTH")
-                            .font(.caption2.bold())
-                            .foregroundStyle(GunaColors.muted)
+                    if entries.isEmpty {
+                        emptyState
+                    } else {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("THIS MONTH")
+                                .font(.caption2.bold())
+                                .foregroundStyle(GunaColors.muted)
 
-                        LazyVGrid(columns: columns, spacing: 4) {
-                            ForEach(Array(mockDays.enumerated()), id: \.offset) { _, guna in
-                                RoundedRectangle(cornerRadius: 4)
-                                    .fill(GunaColors.color(for: guna))
-                                    .aspectRatio(1, contentMode: .fit)
+                            LazyVGrid(columns: columns, spacing: 4) {
+                                ForEach(last30Days, id: \.self) { day in
+                                    dayCell(for: day)
+                                }
                             }
                         }
-                    }
-                    .padding(14)
-                    .background(GunaColors.card)
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
-                    .shadow(color: .black.opacity(0.05), radius: 3, y: 1)
-                    .padding(.bottom, 14)
+                        .padding(14)
+                        .background(GunaColors.card)
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                        .shadow(color: .black.opacity(0.05), radius: 3, y: 1)
+                        .padding(.bottom, 14)
 
-                    (
-                        Text("Pattern: ").bold().foregroundStyle(GunaColors.sattva)
-                        + Text("You trend Rajas on Monday & Tuesday mornings, and Tamas by Thursday evening.")
-                            .foregroundStyle(GunaColors.ink)
-                    )
-                    .font(.subheadline)
-                    .padding(14)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(GunaColors.sattvaSoft)
-                    .clipShape(RoundedRectangle(cornerRadius: 14))
+                        insightCard
+                    }
                 }
                 .padding(20)
             }
@@ -61,8 +48,80 @@ struct HistoryView: View {
             .navigationTitle("History")
         }
     }
+
+    // MARK: - Empty state
+
+    private var emptyState: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("No check-ins yet")
+                .font(.subheadline.bold())
+            Text("Head to the Check-in tab — your history will build up here.")
+                .font(.caption)
+                .foregroundStyle(GunaColors.muted)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(14)
+        .background(GunaColors.card)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+    }
+
+    // MARK: - Heatmap
+
+    private var last30Days: [Date] {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: .now)
+        return (0..<30).reversed().compactMap { offset in
+            calendar.date(byAdding: .day, value: -offset, to: today)
+        }
+    }
+
+    private func blend(onDay day: Date) -> GunaBlend? {
+        let calendar = Calendar.current
+        let dayEntries = entries.filter { calendar.isDate($0.date, inSameDayAs: day) }
+        guard !dayEntries.isEmpty else { return nil }
+        return GunaBlend.average(dayEntries.map(\.blend))
+    }
+
+    private func dayCell(for day: Date) -> some View {
+        let dayBlend = blend(onDay: day)
+        return RoundedRectangle(cornerRadius: 4)
+            .fill(dayBlend.map { GunaColors.color(for: $0.dominant) } ?? GunaColors.border.opacity(0.5))
+            .aspectRatio(1, contentMode: .fit)
+    }
+
+    // MARK: - Insight
+
+    private var dominantGunaOverall: Guna? {
+        let counts = Dictionary(grouping: entries, by: \.blend.dominant).mapValues(\.count)
+        return counts.max(by: { $0.value < $1.value })?.key
+    }
+
+    private var insightCard: some View {
+        Group {
+            if entries.count < 3 {
+                insightText(Text("A few more check-ins and I'll start showing you patterns."))
+            } else if let top = dominantGunaOverall {
+                insightText(
+                    Text("Lately you've mostly been in ")
+                    + Text(top.rawValue).bold().foregroundStyle(GunaColors.color(for: top))
+                    + Text(".")
+                )
+            }
+        }
+    }
+
+    private func insightText(_ text: Text) -> some View {
+        text
+            .font(.subheadline)
+            .foregroundStyle(GunaColors.ink)
+            .padding(14)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(GunaColors.sattvaSoft)
+            .clipShape(RoundedRectangle(cornerRadius: 14))
+    }
 }
 
 #Preview {
     HistoryView()
+        .modelContainer(for: CheckInEntry.self, inMemory: true)
 }
