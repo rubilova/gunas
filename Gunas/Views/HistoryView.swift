@@ -67,10 +67,11 @@ struct HistoryView: View {
 
     // MARK: - Heatmap
 
+    /// Newest day first, so today lands top-left in the grid.
     private var last30Days: [Date] {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: .now)
-        return (0..<30).reversed().compactMap { offset in
+        return (0..<30).compactMap { offset in
             calendar.date(byAdding: .day, value: -offset, to: today)
         }
     }
