@@ -2,8 +2,23 @@ import SwiftUI
 
 struct ResultView: View {
     let blend: GunaBlend
+    var tagNames: [String] = []
+    var hadNote: Bool = false
 
     private var dominant: Guna { blend.dominant }
+
+    private var basedOnText: String {
+        switch (tagNames.isEmpty, hadNote) {
+        case (false, true):
+            return "Based on: \(tagNames.joined(separator: ", ")) + your note"
+        case (false, false):
+            return "Based on: \(tagNames.joined(separator: ", "))"
+        case (true, true):
+            return "Based on your note"
+        case (true, false):
+            return "Based on your note (no strong signal found — try a tag too)"
+        }
+    }
 
     var body: some View {
         ScrollView {
@@ -13,9 +28,10 @@ struct ResultView: View {
                     .multilineTextAlignment(.center)
                     .padding(.bottom, 4)
 
-                Text("Blend from your tags + description")
+                Text(basedOnText)
                     .font(.subheadline)
                     .foregroundStyle(GunaColors.muted)
+                    .multilineTextAlignment(.center)
                     .padding(.bottom, 16)
 
                 GunaDonut(blend: blend)

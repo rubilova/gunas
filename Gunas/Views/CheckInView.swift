@@ -6,6 +6,8 @@ struct CheckInView: View {
     @State private var selectedTags: Set<FeelingTag> = []
     @State private var freeText: String = ""
     @State private var resultBlend: GunaBlend?
+    @State private var resultTagNames: [String] = []
+    @State private var resultHadNote = false
     @State private var showResult = false
     @FocusState private var isTextEditorFocused: Bool
 
@@ -72,7 +74,7 @@ struct CheckInView: View {
             .background(GunaColors.background)
             .navigationDestination(isPresented: $showResult) {
                 if let resultBlend {
-                    ResultView(blend: resultBlend)
+                    ResultView(blend: resultBlend, tagNames: resultTagNames, hadNote: resultHadNote)
                 }
             }
         }
@@ -108,11 +110,14 @@ struct CheckInView: View {
 
     private func computeResult() {
         let tagBlend = selectedTags.isEmpty ? nil : GunaBlend.average(selectedTags.map(\.blend))
-        let textBlend = GunaClassifier.classifyText(freeText)
-        let blend = GunaClassifier.combine(tagBlend: tagBlend, textBlend: textBlend)
-        resultBlend = blend
-
         let trimmedNote = freeText.trimmingCharacters(in: .whitespacesAndNewlines)
+        let textBlend = GunaClassifier.classifyText(trimmedNote)
+        let blend = GunaClassifier.combine(tagBlend: tagBlend, textBlend: textBlend)
+
+        resultBlend = blend
+        resultTagNames = selectedTags.map(\.name).sorted()
+        resultHadNote = (textBlend != nil)
+
         modelContext.insert(CheckInEntry(blend: blend, note: trimmedNote))
 
         showResult = true
