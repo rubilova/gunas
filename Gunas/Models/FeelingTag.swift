@@ -15,6 +15,7 @@ enum FeelingTags {
     static let all: [FeelingTag] = [
         // Sattva-leaning
         FeelingTag(name: "Calm", blend: GunaBlend(sattva: 1.0, rajas: 0, tamas: 0)),
+        FeelingTag(name: "Happy", blend: GunaBlend(sattva: 0.9, rajas: 0.1, tamas: 0)),
         FeelingTag(name: "Focused", blend: GunaBlend(sattva: 0.9, rajas: 0.1, tamas: 0)),
         FeelingTag(name: "Grateful", blend: GunaBlend(sattva: 0.9, rajas: 0.1, tamas: 0)),
         FeelingTag(name: "Content", blend: GunaBlend(sattva: 1.0, rajas: 0, tamas: 0)),

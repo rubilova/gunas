@@ -5,6 +5,7 @@ struct CheckInView: View {
     @State private var freeText: String = ""
     @State private var resultBlend: GunaBlend?
     @State private var showResult = false
+    @FocusState private var isTextEditorFocused: Bool
 
     var body: some View {
         NavigationStack {
@@ -41,6 +42,16 @@ struct CheckInView: View {
                         )
                         .clipShape(RoundedRectangle(cornerRadius: 14))
                         .padding(.bottom, 24)
+                        .focused($isTextEditorFocused)
+                        .toolbar {
+                            ToolbarItemGroup(placement: .keyboard) {
+                                Spacer()
+                                Button("Done") {
+                                    isTextEditorFocused = false
+                                }
+                                .font(.subheadline.bold())
+                            }
+                        }
 
                     Button(action: computeResult) {
                         Text("See my guna")
@@ -55,6 +66,7 @@ struct CheckInView: View {
                 }
                 .padding(20)
             }
+            .scrollDismissesKeyboard(.interactively)
             .background(GunaColors.background)
             .navigationDestination(isPresented: $showResult) {
                 if let resultBlend {
@@ -83,6 +95,7 @@ struct CheckInView: View {
                 Capsule().stroke(isSelected ? GunaColors.color(for: guna) : GunaColors.border, lineWidth: 1.5)
             )
             .onTapGesture {
+                isTextEditorFocused = false
                 if isSelected {
                     selectedTags.remove(tag)
                 } else {
