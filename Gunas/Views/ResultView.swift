@@ -23,6 +23,15 @@ struct ResultView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 0) {
+                Image(dominant.imageName)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(height: 180)
+                    .frame(maxWidth: .infinity)
+                    .clipped()
+                    .clipShape(RoundedRectangle(cornerRadius: 20))
+                    .padding(.bottom, 16)
+
                 Text("You're mostly in \(dominant.rawValue)")
                     .font(.title2.bold())
                     .multilineTextAlignment(.center)

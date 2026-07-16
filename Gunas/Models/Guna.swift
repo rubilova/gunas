@@ -23,6 +23,28 @@ enum Guna: String, CaseIterable, Identifiable {
         }
     }
 
+    /// Name of the imageset in Assets.xcassets used to represent this guna.
+    var imageName: String {
+        switch self {
+        case .sattva: return "GunaSattva"
+        case .rajas: return "GunaRajas"
+        case .tamas: return "GunaTamas"
+        }
+    }
+
+    /// A longer, plain-language explanation for readers unfamiliar with the concept.
+    /// Shown on the Guna Guide screen.
+    var about: String {
+        switch self {
+        case .sattva:
+            return "Sattva is the quality of clarity and balance. It's the state behind a clear, quiet mind — when you feel present, content, and unhurried, with nothing pulling you in different directions. In the Bhagavad Gita's framework, sattva is described as luminous and untroubled: not excitement, just ease."
+        case .rajas:
+            return "Rajas is the quality of motion and desire. It shows up as drive, ambition, restlessness, or craving — the energy that gets things done but can just as easily tip into agitation, impatience, or burnout when it runs unchecked. Most modern \"productive but wired\" days lean rajasic."
+        case .tamas:
+            return "Tamas is the quality of inertia and heaviness. It's the fog, the flatness, the pull toward the couch instead of the task — sometimes genuine rest your body needs, sometimes avoidance or stagnation. Tamas isn't \"bad\"; it's a signal to slow down and figure out which one it is."
+        }
+    }
+
     var reflection: String {
         switch self {
         case .sattva:

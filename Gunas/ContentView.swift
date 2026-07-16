@@ -13,6 +13,11 @@ struct ContentView: View {
                     Label("History", systemImage: "calendar")
                 }
 
+            GunaGuideView()
+                .tabItem {
+                    Label("Guide", systemImage: "book")
+                }
+
             SettingsView()
                 .tabItem {
                     Label("Settings", systemImage: "gearshape")
