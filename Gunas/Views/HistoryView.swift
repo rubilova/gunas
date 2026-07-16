@@ -3,6 +3,7 @@ import SwiftData
 
 struct HistoryView: View {
     @Query(sort: \CheckInEntry.date, order: .reverse) private var entries: [CheckInEntry]
+    @State private var selectedDay: DaySelection?
 
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 4), count: 7)
 
@@ -46,6 +47,9 @@ struct HistoryView: View {
             }
             .background(GunaColors.background)
             .navigationTitle("History")
+            .sheet(item: $selectedDay) { selection in
+                DayDetailView(day: selection.date, entries: dayEntries(for: selection.date))
+            }
         }
     }
 
@@ -76,9 +80,13 @@ struct HistoryView: View {
         }
     }
 
-    private func blend(onDay day: Date) -> GunaBlend? {
+    private func dayEntries(for day: Date) -> [CheckInEntry] {
         let calendar = Calendar.current
-        let dayEntries = entries.filter { calendar.isDate($0.date, inSameDayAs: day) }
+        return entries.filter { calendar.isDate($0.date, inSameDayAs: day) }
+    }
+
+    private func blend(onDay day: Date) -> GunaBlend? {
+        let dayEntries = dayEntries(for: day)
         guard !dayEntries.isEmpty else { return nil }
         return GunaBlend.average(dayEntries.map(\.blend))
     }
@@ -88,6 +96,10 @@ struct HistoryView: View {
         return RoundedRectangle(cornerRadius: 4)
             .fill(dayBlend.map { GunaColors.color(for: $0.dominant) } ?? GunaColors.border.opacity(0.5))
             .aspectRatio(1, contentMode: .fit)
+            .contentShape(Rectangle())
+            .onTapGesture {
+                selectedDay = DaySelection(date: day)
+            }
     }
 
     // MARK: - Insight
@@ -120,6 +132,12 @@ struct HistoryView: View {
             .background(GunaColors.sattvaSoft)
             .clipShape(RoundedRectangle(cornerRadius: 14))
     }
+}
+
+/// Wraps a Date so it can drive a `.sheet(item:)` presentation.
+private struct DaySelection: Identifiable {
+    let date: Date
+    var id: Date { date }
 }
 
 #Preview {
