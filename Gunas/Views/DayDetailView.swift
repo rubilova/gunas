@@ -81,6 +81,20 @@ struct DayDetailView: View {
                 percentLabel(.tamas, entry.blend)
             }
 
+            if !entry.tagNames.isEmpty {
+                FlowLayout(spacing: 6) {
+                    ForEach(entry.tagNames, id: \.self) { tagName in
+                        Text(tagName)
+                            .font(.caption2.bold())
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 5)
+                            .background(GunaColors.softColor(for: dominant))
+                            .foregroundStyle(GunaColors.color(for: dominant))
+                            .clipShape(Capsule())
+                    }
+                }
+            }
+
             if !trimmedNote.isEmpty {
                 Text(trimmedNote)
                     .font(.caption)

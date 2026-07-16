@@ -11,13 +11,17 @@ final class CheckInEntry {
     var rajas: Double
     var tamas: Double
     var note: String
+    /// Names of the feeling tags selected for this check-in. Defaults to
+    /// empty so existing saved entries migrate automatically.
+    var tagNames: [String] = []
 
-    init(date: Date = .now, blend: GunaBlend, note: String = "") {
+    init(date: Date = .now, blend: GunaBlend, note: String = "", tagNames: [String] = []) {
         self.date = date
         self.sattva = blend.sattva
         self.rajas = blend.rajas
         self.tamas = blend.tamas
         self.note = note
+        self.tagNames = tagNames
     }
 
     var blend: GunaBlend {

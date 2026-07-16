@@ -118,7 +118,7 @@ struct CheckInView: View {
         resultTagNames = selectedTags.map(\.name).sorted()
         resultHadNote = (textBlend != nil)
 
-        modelContext.insert(CheckInEntry(blend: blend, note: trimmedNote))
+        modelContext.insert(CheckInEntry(blend: blend, note: trimmedNote, tagNames: resultTagNames))
 
         showResult = true
         selectedTags.removeAll()
